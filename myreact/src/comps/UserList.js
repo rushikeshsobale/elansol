@@ -1,20 +1,27 @@
-
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { jwtDecode } from 'jwt-decode';
-
+import { useNavigate } from 'react-router-dom';
 const UserList = () => {
+    const Navigate = useNavigate()
     const [name, setName] = useState("");
     const [dob, setDob] = useState("");
     const [email, setEmail] = useState("");
     const [users, setUsers] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null); // Add state for the selected user
-    const token = localStorage.getItem("token");
-    console.log(token.userId, 'Hiiiiiiii')
-    const decodedToken = jwtDecode(token);
-    const userId = decodedToken.userId;
-    console.log(userId, "giigigigig");
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [userId, setUserId] = useState(null); 
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        const decodedToken = token ? jwtDecode(token) : null;
+        const userId = decodedToken ? decodedToken.userId : null;
+        setUserId(userId); 
+        return () => {
+            setUserId(null); 
+        };
+    }, []);
+
     const fetchUsers = async () => {
         try {
             const response = await fetch("http://localhost:3050/users");
@@ -30,15 +37,12 @@ const UserList = () => {
     };
 
     useEffect(() => {
-
         fetchUsers();
-
     }, []);
 
     const showModel = (user) => {
-        setSelectedUser(user); // Set the selected user when the modal is opened
+        setSelectedUser(user);
         setShowModal(true);
-        // Set the initial state of name, dob, and email with the values of the selected user
         setName(user.name);
         setDob(user.dob);
         setEmail(user.email);
@@ -46,9 +50,16 @@ const UserList = () => {
 
     const closeModal = () => {
         setShowModal(false);
+        setName(""); // Reset input fields when closing modal
+        setDob("");
+        setEmail("");
     };
 
     const saveChanges = async () => {
+        if (!name || !dob || !email) {
+            alert("Please fill in all fields");
+            return;
+        }
         try {
             const response = await fetch(`http://localhost:3050/update/${userId}`, {
                 method: "PUT",
@@ -63,9 +74,8 @@ const UserList = () => {
             });
 
             if (response.ok) {
-                // Profile updated successfully
                 console.log("Profile updated successfully");
-                closeModal(); // Close the modal after saving changes
+                closeModal();
                 fetchUsers();
             } else {
                 console.error("Failed to update profile:", response.statusText);
@@ -74,6 +84,7 @@ const UserList = () => {
             console.error("Error updating profile:", error);
         }
     };
+
     const removeUser = async (userId) => {
         try {
             const response = await fetch(`http://localhost:3050/remove/${userId}`, {
@@ -82,7 +93,10 @@ const UserList = () => {
 
             if (response.ok) {
                 console.log("User removed successfully");
-                fetchUsers();
+            
+                localStorage.removeItem("token");
+                Navigate('./login')
+                window.location.reload();
             } else {
                 console.error("Failed to remove user:", response.statusText);
             }
@@ -90,12 +104,22 @@ const UserList = () => {
             console.error("Error removing user:", error);
         }
     };
+
+    if (!userId) {
+        return (
+          <div className=" custom-background container text-center">
+            <p>Looks like you have not logged in</p>
+            <p>Please log in to get user list</p>
+          </div>
+        )
+    }
+
     return (
-        <div className="container">
-            <h2>User List</h2>
-            <table className="table">
+        <div className=" custom-background2" style={{height:"700px"}}>
+        
+            <table className=" custom-background text-center w-75 m-auto p-3">
                 <thead>
-                    <tr>
+                    <tr className='p-1 my-1'>
                         <th scope="col">#</th>
                         <th scope="col">Name</th>
                         <th scope="col">Email</th>
@@ -105,7 +129,7 @@ const UserList = () => {
                 </thead>
                 <tbody>
                     {users.map((user, index) => (
-                        <tr key={user._id}>
+                        <tr key={user._id} className='p-1 my-1'>
                             <td>{index + 1}</td>
                             <td>{user.name}</td>
                             <td>{user.email}</td>
@@ -118,7 +142,6 @@ const UserList = () => {
                     ))}
                 </tbody>
             </table>
-            {/* Add your modal component here */}
             {showModal && (
                 <div className="modal fade show" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
                     <div className="modal-dialog" role="document">

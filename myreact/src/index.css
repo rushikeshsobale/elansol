@@ -11,3 +11,18 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+.custom-input::placeholder {
+  color: #999; /* Change the color as per your preference */
+}
+.custom-background {
+  background: linear-gradient(to bottom, #104960, #48a8b5); /* Adjust the colors as per your preference */
+}
+.custom-background2 {
+  background: linear-gradient(to bottom, #526065, #1b1931) !important; /* Adjust the colors as per your preference */
+}
+
+.custom-shadow {
+  box-shadow: 28px 21px 27px 16px rgba(0, 0, 0, 10);
+  margin-top: 26px;
+  padding-bottom: 19px;
+}

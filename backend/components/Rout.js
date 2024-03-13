@@ -139,10 +139,10 @@ router.put("/update/:id", async (req, res) => {
 
 router.delete('/remove/:userId', async (req, res) => {
     try {
-        // Extract the userId from the request parameters
+    
         const userId = req.params.userId;
 
-        // Use the findByIdAndDelete method to remove the user by ID
+        
         const removedUser = await AllData.findByIdAndDelete(userId);
 
         if (removedUser) {
@@ -151,7 +151,7 @@ router.delete('/remove/:userId', async (req, res) => {
             res.status(404).json({ error: `User with ID ${userId} not found` });
         }
     } catch (error) {
-        // Handle errors
+        
         console.error('Error removing user:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
